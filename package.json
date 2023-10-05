@@ -1,0 +1,33 @@
+{
+  "name": "forkify",
+  "version": "1.0.0",
+  "description": "Recipe Searching Application",
+  "scripts": {
+    "start": "parcel index.html",
+    "build": "parcel build index.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ShaAnder/forkify.git"
+  },
+  "keywords": [
+    "recipe",
+    "application"
+  ],
+  "author": "Shaun Anderton",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ShaAnder/forkify/issues"
+  },
+  "homepage": "https://github.com/ShaAnder/forkify#readme",
+  "devDependencies": {
+    "@parcel/transformer-sass": "^2.9.3",
+    "parcel": "^2.9.3",
+    "sass": "^1.68.0"
+  },
+  "dependencies": {
+    "core-js": "^3.32.2",
+    "fractional": "^1.0.0",
+    "regenerator-runtime": "^0.14.0"
+  }
+}
