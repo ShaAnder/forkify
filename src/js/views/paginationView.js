@@ -11,41 +11,46 @@ import icons from 'url:../../img/icons.svg';
 
 // ---- RESULTS VIEW CLASS ---- //
 
+// PaginationView Child class controls how our buttons are made
 class PaginationView extends View {
   _parentEl = PAGINATION;
 
-  // now we need more subscriber / publisher stuff here, we want to create a
-  // function to handle the swapping between the button clicks
-
+  /**
+   * Handler for clicking the pages, listens for a click and gets the closest parent element
+   * (btn) then passes the new page number (what was clicked) as an arg back to the function
+   * so that it can render the new page
+   * @param {function} handler
+   * @returns nothing, or guards / stops func if no button
+   * @author ShAnder
+   */
   addHandlerClick(handler) {
     this._parentEl.addEventListener('click', function (e) {
-      // now we need to do event delegation to get the closest button to the clicked
+      // event delegation to get closest element(btn) clicked
       const btn = e.target.closest('.btn--inline');
-      // we're searching for all the children of the btn--inline to ensure if we missclick
-      // it will still go through (if it's close)
-
       // guard clause in case no button
       if (!btn) return;
-
-      // we look for our data here and store it in a const for later
+      // look for the btn dataset and store it for passing back to fn
       const goToPage = +btn.dataset.goto;
       handler(goToPage);
     });
   }
 
+  /**
+   * Generate our buttons markup for our pages, gets the current page and amount of pages
+   * based on the results of the num pages formula generates the buttons we use based on conditional
+   * args
+   * @returns {string} markup string of our buttons
+   * @author ShAnder
+   */
   _generateMarkup() {
     // get our cur page
     const curPage = this._data.page;
-    // firs let's get the number of pages, it gets the results and divides it by oure resperpage (10)
+    // get number of pages but dividing results by per page number (in config)
     const numPages = Math.ceil(
       this._data.results.length / this._data.resultsPerPage
     );
 
-    // NOW we run some checks to see if we are on a certain page
-
-    // As well as this we need to add in a data attribute to the html, this is a persistent piece
-    // that allows us or js rather to know where to go for the button moving, cos while we CAN
-    // nav between buttons it doesn't know right now. All we do is set it to the same as the current page + or - 1
+    // Now if checks based on what pages we want to see
 
     // Page 1, there are other pages
     if (curPage === 1 && numPages > 1) {

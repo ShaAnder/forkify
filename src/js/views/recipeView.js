@@ -4,54 +4,73 @@
 
 import icons from 'url:../../img/icons.svg';
 import { Fraction } from 'fractional';
-import { mark } from 'regenerator-runtime';
 
 // parent class
-
 import View from './view.js';
 
 // ---- RECIPE VIEW CLASS ---- //
 
-// we've made a child class out of recipeView as there's a lot it has in common with the other views
+// Recipe view child class, responsible for generating the recipe preview window
 class RecipeView extends View {
   _parentEl = document.querySelector('.recipe');
   _errorMessage = 'Cannot find recipe, please try again!';
   _message = '';
 
-  // this method is our publisher, aka the one handling the subscriber
-  // so it needs access to the subscriber (handler)
-
-  // we will pass the subscriber into this, it's not a private method as it needs
-  // to be part of the public api of the method
+  /**
+   * Handler for dealing with hashchanges in the url
+   * @param {function} handler
+   * @returns nothing
+   * @author ShAnder
+   */
   addHandlerRender(handler) {
     ['hashchange', 'load'].forEach(ev => window.addEventListener(ev, handler));
   }
 
-  // Now we create a handler method for our servings, because we already have them in this file
+  /**
+   * Handler for updating the servings of the recipe, responsible for making sure that the html is
+   * up to date and numbers are modified accordingly
+   * @param {function} handler
+   * @returns nothing / cancels function if guard clause triggers
+   * @author ShAnder
+   */
   addHandlerUpdateServings(handler) {
-    // so we want to add a click event listener for when these buttons are clicked
+    // event listener for button clicks
     this._parentEl.addEventListener('click', function (e) {
+      // closest parent
       const btn = e.target.closest('.btn--update-servings');
+      // Guard clause
       if (!btn) return;
-      // we update to our dataset values in the generate markup
+      // update the dataset values for serving numbers
       const { updateTo } = btn.dataset;
-      // and we also want to make sure that people don't go into the minus servings
-      // so we will only fire the handler IF it's 1 or above
+      // make sure user cannot go into - servings
       if (+updateTo > 0) handler(+updateTo);
     });
   }
 
-  // and now we want another handler for our controller
-
+  /**
+   * Handler for adding the recipe to the bookmarks, this could be in the bookmarks view but
+   * works and is kind of relevant here too so no need to move
+   * @param {function} handler
+   * @returns a markup string for placing into the html
+   * @author ShAnder
+   */
   addHandlerAddBookmark(handler) {
+    // listen for click
     this._parentEl.addEventListener('click', function (e) {
+      // closest child
       const btn = e.target.closest('.btn--bookmark');
+      // guard clause
       if (!btn) return;
       handler();
     });
   }
 
-  // generates the markup for our recipe
+  /**
+   * Generate our recipe markup, this is the markup for the main recipe view that shows
+   * Ingredients servings and all the general info about the recipe
+   * @returns a markup string for placing into the html
+   * @author ShAnder
+   */
   _generateMarkup() {
     return `
     <figure class="recipe__fig">
@@ -146,6 +165,14 @@ class RecipeView extends View {
 
 `;
   }
+
+  /**
+   * Small markup method to correctly parse ingredient amounts, as decimals can get really
+   * long if we update the servings too many times, compresses it into a neat fraction for ui exp
+   * @param {data item} ing
+   * @returns markup string for adding into html
+   * @author ShAnder
+   */
   _generateMarkupIngredient(ing) {
     return `                
         <li class="recipe__ingredient">
@@ -163,6 +190,5 @@ class RecipeView extends View {
   }
 }
 
-// so we won't export the full class just one instance of it
-// now we don't have issues with people creating more
+// export one instance of RecipeView for application use
 export default new RecipeView();

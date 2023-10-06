@@ -25,34 +25,46 @@ export const state = {
 
 // ---- MODEL ---- //
 
+/**
+ * Async export function for loading the recipe from the url
+ * @param {string} id string for the recipe for loading purposes
+ * @returns nothing
+ * @author ShAnder
+ */
+
 export const loadRecipe = async function (id) {
   try {
-    // we get our data from the getJSON func
+    // get our data from the AJAX helper
     const data = await AJAX(`${API_URL}/${id}`);
-    // and our recipe from our formatRecipe func
+    // add our data to the state while also formatting it with helper
     state.recipe = await formatRecipe(data);
-
-    // as it stands when we add bookmarks they get wiped when we update the html so
-    // this is how we will load our bookmarked recipes, if a recipe is in the bookmarked
-    // loop through loaded recipes, and if it matches those in the bookmarked array rebookmark it
+    // Re-add bookmarked property to recipes we have bookmarked (search for matching id, if matches add property)
     if (state.bookmarks.some(b => b.id === id)) state.recipe.bookmarked = true;
+    // else do not add property
     else state.recipe.bookmarked = false;
   } catch (err) {
-    // we need to throw this error to propogate it
+    // catch and throw error to propogate down
     throw err;
   }
 };
 
-// Now this function will load our search results
+//---------------------------------------------------------------//
+
+/**
+ * Async export function to control search result loading
+ * @param {string} query string, what we get back from the search form
+ * @returns {object} of data for rendering the recipe item in the search bar
+ * @author ShAnder
+ */
 export const loadSearchResults = async function (query) {
   try {
-    // we set our empty query here
+    // set queery to empty
     state.search.query = query;
-    // so let's get our url
+    // get data from url
     const data = await AJAX(`${API_URL}?search=${query}&key=${API_KEY}`);
-    // so we want to get all the data
+    // map over it
     state.search.results = data.data.recipes.map(rec => {
-      // we can't use format recipe here as we only want these 4
+      // return what we need for each search item
       return {
         id: rec.id,
         title: rec.title,
@@ -62,71 +74,102 @@ export const loadSearchResults = async function (query) {
       };
     });
   } catch (err) {
+    // catch and throw error to propogate
     throw err;
   }
 };
 
-// Now we're going to implement pagination, having pages for our recipes
-// not async as we already have results loaded so this will come after
-export const getSearchResultsPage = function (page = state.search.page) {
-  // we want to get the page default
-  state.search.page = page;
+//---------------------------------------------------------------//
 
-  //we only want to return a part of the results, so we're going to
-  //calc dynamically, we will get the "page" * 10 and that should give us a page
-  // with 10 results, we do page -1 as well to ensure it starts correctly
-  console.log(page);
-  // and ofc for dynamics we want to set a start and end
+/**
+ * export function to control getting the results page number
+ * @param {dataset} dataset number to go to the page we want, default of the state page
+ * @returns {Array} of data containing that pages search results (the slice start and end)
+ * @author ShAnder
+ */
+export const getSearchResultsPage = function (page = state.search.page) {
+  // get page default
+  state.search.page = page;
+  // dynamically calc the page results, so that we don't need hard coded numbers
   const start = (page - 1) * state.search.resultsPerPage; //0
   const end = page * state.search.resultsPerPage; //9
-
   // then return the slice for rendering
   return state.search.results.slice(start, end);
 };
 
-// Now we create a servings function for updating the recipe servings for
-// any given recipe
+//---------------------------------------------------------------//
 
+/**
+ * export function for controlling servings updates
+ * @param {dataset} newServings number, what we get back from the recipe view handler
+ * @returns nothing
+ * @author ShAnder
+ */
 export const updateServings = function (newServings) {
-  // this func will reach into the state / recipe to the
-  // ingredients and update them based on the number of servings
+  // gets the ingredients from the state
   state.recipe.ingredients.forEach(ing => {
-    // we're going to use a formula to figure this out with a simple formula
-    // newQt = oldQt * newServings / oldServings // 2 * 8 / 4 = 4
+    // formula to calculate new ingredient quantity based on the servings
     ing.quantity = (ing.quantity * newServings) / state.recipe.servings;
   });
-
   // now update the servings
   state.recipe.servings = newServings;
 };
 
-// STORING BOOKMARKS IN LOCAL STORAGE
+//---------------------------------------------------------------//
+
+/**
+ * function for storing bookmarks in local storage
+ * @returns nothing
+ * @author ShAnder
+ */
 const persistBookmarks = function () {
+  // stringify and store our bookmarks
   localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
 };
 
-// Now we want to begin building bookmarks and the bookmark functionality
-export const addBookmarks = function (recipe) {
-  // Add Bookmarks
-  state.bookmarks.push(recipe);
+//---------------------------------------------------------------//
 
+/**
+ * export function for adding bookmarks
+ * @param {object} recipe, object containing our recipe data
+ * @returns nothing
+ * @author ShAnder
+ */
+export const addBookmarks = function (recipe) {
+  // Push recipe to the bookmarks array (array of objects)
+  state.bookmarks.push(recipe);
   // Mark current recipe as bookmarks
   if (recipe.id === state.recipe.id) state.recipe.bookmarked = true;
-
+  // save updated bookmarks to local storage
   persistBookmarks();
 };
 
-// now we want to setup bookmark deletion
+//---------------------------------------------------------------//
+
+/**
+ * export function for deleting bookmarks
+ * @param {string} id, id string to identify our recipe
+ * @returns nothing
+ * @author ShAnder
+ */
 export const deleteBookmark = function (id) {
-  // Delete Bookmarks
+  // Get the index from our bookmarks state
   const index = state.bookmarks.findIndex(el => el.id === id);
+  // splice it out of bookmarks
   state.bookmarks.splice(index, 1);
-  // Mark current recipe as NOT Bookmarked
+  // Mark as NOT Bookmarked
   if (id === state.recipe.id) state.recipe.bookmarked = false;
-
+  // save updated bookmarks to local storage
   persistBookmarks();
 };
 
+//---------------------------------------------------------------//
+
+/**
+ * init function to get any saved bookmarks from storage and add them to state
+ * @returns nothing
+ * @author ShAnder
+ */
 const init = function () {
   const storage = localStorage.getItem('bookmarks');
   if (storage) state.bookmarks = JSON.parse(storage);
@@ -134,38 +177,46 @@ const init = function () {
 
 init();
 
-// quick dev function to clear bookmarks when we need
+//---------------------------------------------------------------//
+
+/**
+ * dev function (unused) for clearing bookmakrks storage
+ * @returns nothing
+ * @author ShAnder
+ */
 const clearBookmarks = function () {
   localStorage.clear('bookmarks');
 };
 
-// clearBookmarks();
+//---------------------------------------------------------------//
 
-// UPLOAD A RECIPE
+/**
+ * Async export function for uploading a recipe, takes the new recipe from the form data
+ * filters it down to the ingredients required then creates a new array out of them then
+ * formats it and adds to the bookmarks
+ * @param {form data} newRecipe form data, passed in for manipulation
+ * @returns ingredient quantities for use in the recipe uploading
+ * @author ShAnder
+ */
 export const uploadRecipe = async function (newRecipe) {
   try {
+    // get ingredients by using object.entries
     const ingredients = Object.entries(newRecipe)
-      // Get entries of new recipe, filter for ones that start with ingredients and are not empty strings
+      // Filter it down to just the ingredients
       .filter(entry => entry[0].startsWith('ingredient') && entry[1] !== '')
-      // then map to a new array and replace the white space / split the strings.
+      // map into an array and trim away whitespace
       .map(ing => {
-        // This returns a new array with 3 elements so we can destructure it to get what we need
+        // Treturn array we can destructure
         const ingArr = ing[1].split(',').map(el => el.trim());
-        // we also want error checks in case the array length is wrong (they don't format correctly)
+        // throw error if wrong format
         if (ingArr.length !== 3)
           throw new Error('Wrong format please use the correct one');
+        // three fields for returning
         const [quantity, unit, description] = ingArr;
-
-        // we want to fix the object items so that we don't have any undefined items,
-
-        // now we return an object with these three items, we also need to convert the quantity to
-        // ensure it doesn't show up as a string,
+        // return ingredient details converted to correct format
         return { quantity: quantity ? +quantity : null, unit, description };
       });
-
-    // now we want to create the recipe object for uploading
-    // this is kinda the opposite of our format recipe because we're sending
-    // it into that
+    // create new recipe object for uploading
     const recipe = {
       title: newRecipe.title,
       source_url: newRecipe.sourceUrl,
@@ -175,11 +226,14 @@ export const uploadRecipe = async function (newRecipe) {
       servings: newRecipe.servings,
       ingredients,
     };
+    // Post data to the api
     const data = await AJAX(`${API_URL}?key=${API_KEY}`, recipe);
+    // save the recipe to the state while also formatting
     state.recipe = await formatRecipe(data);
     //add bookmark for new recipe
     addBookmarks(state.recipe);
   } catch (err) {
+    // propogate the error
     throw err;
   }
 };

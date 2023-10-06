@@ -1,37 +1,46 @@
 // ---- IMPORTS ---- //
 
-//we want to import our dist images from parcel
-
-// icons
-import icons from 'url:../../img/icons.svg';
-import { mark } from 'regenerator-runtime';
-
 // search dom
 import { SEARCH } from '../config';
 import View from './view';
 
 // ---- SEARCH VIEW CLASS ---- //
 
+// Extends from parent class view
 class SearchView extends View {
   //Set the parent element to the search bar
   _parentEl = SEARCH;
 
-  // now we want to get the value from the search field, we do this by returning the value
-  // this could have been done in controller, but the controller is not responsible for that
+  /**
+   * Get query function, returns the value of the search query in the search bar
+   * @returns value that we request from the search bar
+   * @this {Object} View instance
+   * @author ShAnder
+   */
   getQuery() {
     const query = this._parentEl.querySelector('.search__field').value;
     this._clearInput();
     return query;
   }
 
-  // we now want to clear an input when someone hits submit
-  //(this is diff to clear from parent as we are clearing a diff field)
+  /**
+   * Clears teh parent element
+   * @returns Nothing
+   * @this {Object} View instance
+   * @author ShAnder
+   */
   _clearInput() {
     this._parentEl.querySelector('.search__field').value = '';
   }
 
-  // and now more subscriber publisher method, we want to pass this to the controller
-  // whenever a search submit field is hit
+  /**
+   * Adds a handler for subscriber publisher function, this handles and executes
+   * the function it's tied to in controller when the event condition is met
+   * @returns Nothing
+   * @param {handler} function whichever function is passed into it
+   * @this {Object} View instance
+   * @author ShAnder
+   */
   addHandlerSearch(handler) {
     this._parentEl.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -40,4 +49,5 @@ class SearchView extends View {
   }
 }
 
+// Export the search view
 export default new SearchView();

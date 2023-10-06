@@ -8,11 +8,20 @@ import icons from 'url:../../img/icons.svg';
 
 // ---- PREVIEW VIEW CLASS ---- //
 
-// parent class of results and bookmark view, designed to
-// eliminate duplicate code (markup is exactly the same)
+// PreviewView child class, class that controls markup for rendered recipes
+// Exists so we don't have to do duplicate code can just use it in results / bookmarks
 class PreviewView extends View {
   _parentEl = '';
 
+  /**
+   * Generate markup designed for rendering bookmarks and results, created a view for it here
+   * instead of using duplicate code, takes an object of data and using template literals inserts
+   * it into the html element. Accomplished using class inheritance ex chain:
+   * bookmarks -> here -> render -> handler -> publisher
+   * @param {data object} result object containing our recipe data for parsing into the markup
+   * @returns a markup string for placing into the html
+   * @author ShAnder
+   */
   _generateMarkup(result) {
     const id = window.location.hash.slice(1);
 
@@ -42,4 +51,5 @@ class PreviewView extends View {
   }
 }
 
+// export single instance for use across application
 export default new PreviewView();

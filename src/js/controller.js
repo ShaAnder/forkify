@@ -22,84 +22,105 @@ import { RECIPE_WINDOW, MODAL_CLOSE_SEC } from './config.js';
 
 // ---- MAIN CODE ---- //
 
-// We're creating a function to show the recipe
+/**
+ * Async (promise) control function, responsible for calling methods and views
+ * to render the show the recipe on the page
+ * @returns nothing / cancels function if no id
+ * @author ShAnder
+ */
 const controlRecipes = async function () {
+  // error handling
   try {
+    // get our id, by sliccing the hash
     const id = window.location.hash.slice(1);
-
     // guard clause
     if (!id) return;
-
-    // we're calling spinner from the recipie view, and passing in the window dom element
+    // call the spinner for loading, and user exp
     recipeView.renderSpinner(RECIPE_WINDOW);
-
-    // now we return the results view to mark selected search result
-    // we could use render but if we do that we will get the same flickering as before
-    // because everything will be rerendered, that's why we created update in the first place
+    // UPDATE results view (designed to update only what's new instead of rerendering everything)
     resultsView.update(model.getSearchResultsPage());
-
-    // load recipe from the model, with our id
+    // get our recipe by loading it with the id argument
     await model.loadRecipe(id);
-
-    // render recipe using our render function from recipe view
+    // Render recipe by passing in the state
     recipeView.render(model.state.recipe);
-    // updating bookmarks
+    // Update bookmarks by passing ins tate
     bookmarksView.update(model.state.bookmarks);
     // catch err
   } catch (err) {
-    // we use the render err here, propogated from other files by throwing err
+    // render our error here
     recipeView.renderError();
     console.error(err);
   }
 };
 
+//---------------------------------------------------------------//
+
+/**
+ * Async (promise) control function, responsible for controlling the search results
+ * and rendering them to the search bar
+ * @returns nothing / cancels function if no id
+ * @author ShAnder
+ */
 const controlSearchResults = async function () {
   try {
     //render our spinner
     resultsView.renderSpinner();
-
-    // we could just select the element here, but it's about the dom so in the views it goes
+    // Get our query by calling the get query function from the searchView class
     const query = searchView.getQuery();
-
+    // if no query guard
     if (!query) return;
-
-    // not storing a result because nothing to return
+    // no result to return so we immediately chain instead of store
     await model.loadSearchResults(query);
-
-    // render our results by passing the search result back into the render
-    // because this is now a parent child class (and for notes sake)
-    // the movement of the variable goes from
+    // Render results from render function, a lot of hoops to go through so here's a quick tldr:
     // here -> getSearchResultsPage -> resultsView.render (inherited method) -> _data ->
     // _generateMarkupPreview -> _generateMarkup -> back here -> called in init
     resultsView.render(model.getSearchResultsPage(1));
-
-    // Render the initial page buttons we get from the search result
-    // same as above -> sent to render -> data -> to generate markup ect
+    // render page buttons based on the state
     paginationView.render(model.state.search);
   } catch (err) {}
 };
 
-// we have another controller here for the pagination
+//---------------------------------------------------------------//
+
+/**
+ * Function responsible for controlling page scrolling, takes the dataset from paginationView
+ * and passes it into getSearchResultsPage then resultsView.render which returns the state
+ * @param {dataset} goToPage dataset for updating page number
+ * @returns nothing
+ * @author ShAnder
+ */
 const paginationController = function (goToPage) {
-  // Now er want to render NEW results (this works because render clears then overwrites the info)
+  // pass the dataset in
   resultsView.render(model.getSearchResultsPage(goToPage));
   // And render the NEW buttons
   paginationView.render(model.state.search);
 };
 
-// we're going to build another controller to control servings, just a note while we call these
-// controllers they really are just handlers, we're using mvc so we might as well just stick to
-// naming convention
+//---------------------------------------------------------------//
 
+/**
+ * Function responsible for controlling the servings buttons and updating
+ * the recipe view with the new ingredient amounts
+ * @param {dataset} newServings html dataset, we need this to calc serving amounts in updateServings
+ * @returns nothing
+ * @author ShAnder
+ */
 const servingsController = function (newServings) {
-  // update the recipe servings in the model (in state)
+  // pass new servings into the update servings func -> updatses the state
   model.updateServings(newServings);
-  // now we update the recipe - because we only want to update certain parts of the dom
-  // recipeView.render(model.state.recipe);
+  // pass state into recipeView update -> changes ONLY different items instead of
+  // rerendering entire recipe, saves on load times and looks neater
   recipeView.update(model.state.recipe);
 };
 
-// BOOKMARK CONTROLLER
+//---------------------------------------------------------------//
+
+/**
+ * Function responsible for controlling the bookmark add functionality.
+ * allows us to add recipes to the bookmarks
+ * @returns nothing
+ * @author ShAnder
+ */
 const controlAddBookmark = function () {
   // Control when bookmarks get added, if added delete
   if (!model.state.recipe.bookmarked) model.addBookmarks(model.state.recipe);
@@ -110,37 +131,53 @@ const controlAddBookmark = function () {
   bookmarksView.render(model.state.bookmarks);
 };
 
+//---------------------------------------------------------------//
+
+/**
+ * Function resposible for rendering the bookmarks from the state
+ * @returns nothing
+ * @author ShAnder
+ */
 const controlBookmarks = function () {
+  // render the bookmarks from the state to the html
   bookmarksView.render(model.state.bookmarks);
 };
 
+//---------------------------------------------------------------//
+
+/**
+ * Function resposible for adding recipes to our "account" (local storage + apikey)
+ * @param {object} newRecipe object containing all the details of our new recipe
+ * @returns nothing
+ * @author ShAnder
+ */
 const controlAddRecipe = async function (newRecipe) {
   try {
-    // add spinner for loading purposes
+    // add spinner
     addRecipeView.renderSpinner();
-
     // upload recipe
     await model.uploadRecipe(newRecipe);
-
     // render recipe
     recipeView.render(model.state.recipe);
-
     // Success message
     addRecipeView.renderMessage();
-
-    // we need to update / render the bookmarks view with new recipe
+    // update / render the bookmarks again to show new recipe added
     bookmarksView.render(model.state.bookmarks);
-
-    // now we want to change the id in the url using the history api
+    // Use history api to add the id of the recipe to url
     window.history.pushState(null, '', `#{model.state.recipe.id}`);
   } catch {
     console.error(err);
     addRecipeView.renderError(err);
   }
-  // uploade new recipe data
 };
 
-// INIT SUB / PUB CONTROLLER FUNCTION
+//---------------------------------------------------------------//
+
+/**
+ * Init Function, responsible for calling all our handlers (sub-pub)
+ * @returns nothing
+ * @author ShAnder
+ */
 const init = function () {
   // Render bookmarks
   bookmarksView.addHandlerRender(controlBookmarks);

@@ -6,7 +6,7 @@
 export const API_URL = 'https://forkify-api.herokuapp.com/api/v2/recipes';
 
 // api key
-export const API_KEY = 'Your api key here, get it from forkify api, paste here';
+export const API_KEY = 'Place API Key Here';
 
 // "MAGIC" NUMBERS
 
