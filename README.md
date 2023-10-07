@@ -5,23 +5,23 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/version-2.0.0-blue.svg?cacheSeconds=2592000" />
-  <a href="https://shanderforkify.netlify.app" target="_blank">
+  <a href="https://shander-forkify.netlify.app" target="_blank">
     <img alt="Demo" src="https://img.shields.io/badge/demo-online-green.svg" />
   </a>
-  <a href="https://github.com/CodePapa360/Forkify-Recipe-App#readme" target="_blank">
+  <a href="https://github.com/ShaAnder/forkify#readme" target="_blank">
     <img alt="Documentation" src="https://img.shields.io/badge/documentation-yes-brightgreen.svg" />
   </a>
-  <a href="https://github.com/CodePapa360/Forkify-Recipe-App/graphs/commit-activity" target="_blank">
+  <a href="https://github.com/ShaAnder/forkify/graphs/commit-activity" target="_blank">
     <img alt="Maintenance" src="https://img.shields.io/badge/maintained-yes-green.svg" />
   </a>
-  <a href="https://github.com/CodePapa360/Forkify-Recipe-App/blob/master/LICENSE" target="_blank">
+  <a href="https://github.com/ShaAnder/forkify/blob/main/LICENSE" target="_blank">
     <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg" />
   </a>
 
 </p>
 
 <h2 align="center">
-LIVE <a href="https://shanderforkify.netlify.app" target="_blank">Forkify App</a> can be found here.
+LIVE <a href="https://shander-forkify.netlify.app" target="_blank">Forkify App</a> can be found here.
 </h2>
 <p align="left">
 Forkify is a recipe searching, tracking and uploading app, with it's main functions wholly dictated around being a user friendly way 
