@@ -3,7 +3,7 @@
 //we want to import our dist images from parcel
 
 import icons from 'url:../../img/icons.svg';
-import { fracty } from 'fracty';
+import fracty from 'fracty';
 
 // parent class
 import View from './view.js';
